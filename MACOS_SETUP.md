@@ -4,7 +4,8 @@ This folder is meant to be copied to a macOS machine and built there.
 
 ## Prereqs (macOS)
 
-1. Install Python 3.11 or 3.12.
+1. Install Python 3.11 (recommended) from python.org (no Homebrew needed).
+   - After install, verify in Terminal: `python3.11 --version`
 2. Open Terminal and `cd` into this folder.
 
 ## Build a .app (recommended: lite)
