@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+.Python
+.venv/
+venv/
+.mypy_cache/
+.pytest_cache/
+
+# Builds / packaging
+build/
+dist/
+artifacts/
+*.spec.bak
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.kluster/
+.windsurf/
+
+# Avoid accidentally committing large personal files from this folder
+*.pdf
+*.doc
+*.docx
+*.ppt
+*.pptx
+*.xls
+*.xlsx
+*.epub
+*.mp3
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.gif
+*.zip
+*.rar
+*.7z
+*.exe
+*.iso
+*.torrent
+*.csv

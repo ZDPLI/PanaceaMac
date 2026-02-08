@@ -1,0 +1,50 @@
+name: Build macOS app (lite)
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: ["main", "master"]
+
+jobs:
+  build-macos-lite:
+    runs-on: macos-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install system deps (audio libs)
+        shell: bash
+        run: |
+          set -euo pipefail
+          brew update
+          brew install portaudio libsndfile
+
+      - name: Build Miriam.app (lite)
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash ./build_macos_lite.sh
+
+      - name: Zip .app (preserve bundle)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          # ditto preserves macOS bundle metadata better than zip.
+          ditto -c -k --sequesterRsrc --keepParent "dist/Miriam.app" "artifacts/Miriam-macOS.app.zip"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Miriam-macOS-lite
+          path: artifacts/Miriam-macOS.app.zip
+          if-no-files-found: error
+
