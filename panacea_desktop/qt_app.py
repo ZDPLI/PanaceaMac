@@ -6,6 +6,7 @@ import re
 import threading
 import tempfile
 import time
+import importlib
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
@@ -393,6 +394,14 @@ class SettingsDialog(QtWidgets.QDialog):
         self._initial_tab = initial_tab
 
         tabs = QtWidgets.QTabWidget()
+
+        def _optional_import_ok(mods: list[str]) -> bool:
+            try:
+                for m in mods:
+                    importlib.import_module(m)
+                return True
+            except Exception:
+                return False
 
         # Providers tab
         prov = QtWidgets.QWidget()
@@ -815,6 +824,18 @@ class SettingsDialog(QtWidgets.QDialog):
         self.tts_enabled = QtWidgets.QCheckBox("Speak Miriam answers (TTS)")
         self.tts_enabled.setChecked((db.get_setting("tts_enabled", "0") or "0") == "1")
         self.tts_rate = QtWidgets.QLineEdit(db.get_setting("tts_rate", "175") or "175")
+
+        # On clean macOS installs (no Homebrew), native audio libs are often absent.
+        # Keep the app/build usable by disabling voice toggles when deps are missing.
+        if not _optional_import_ok(["sounddevice", "soundfile"]):
+            self.voice_input_enabled.setChecked(False)
+            self.voice_input_enabled.setEnabled(False)
+            self.voice_input_enabled.setToolTip("Voice input requires optional audio dependencies (sounddevice/soundfile).")
+
+        if not _optional_import_ok(["pyttsx3"]):
+            self.tts_enabled.setChecked(False)
+            self.tts_enabled.setEnabled(False)
+            self.tts_enabled.setToolTip("TTS requires optional dependency pyttsx3.")
 
         voice_l.addRow("", self.voice_input_enabled)
         voice_l.addRow("", self.voice_auto_send)
@@ -1995,6 +2016,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.btn_mic.clicked.connect(self.toggle_voice_recording)
         ib_l.addWidget(self.btn_mic)
 
+        if not self._voice_deps_available():
+            # Keep builds friendly to clean macOS installs (no Homebrew).
+            self.btn_mic.setEnabled(False)
+            self.btn_mic.setToolTip("Voice input unavailable (optional audio dependencies missing).")
+
         # More menu
         self.btn_menu = QtWidgets.QToolButton(objectName="IconBtn")
         self.btn_menu.setText("⋯")
@@ -2275,12 +2301,29 @@ class MainWindow(QtWidgets.QMainWindow):
             self.open_radiology_studies()
 
     # ------------------------------ Voice ------------------------------
+    def _voice_deps_available(self) -> bool:
+        try:
+            importlib.import_module("sounddevice")
+            importlib.import_module("soundfile")
+            return True
+        except Exception:
+            return False
+
     def toggle_voice_recording(self):
         """Start/stop microphone recording.
 
         Records audio locally and then uses the configured provider's
         /audio/transcriptions endpoint to transcribe it.
         """
+        if not self._voice_deps_available():
+            QtWidgets.QMessageBox.information(
+                self,
+                "Voice input",
+                "Voice input is not available in this build (missing optional audio dependencies).\n\n"
+                "You can still use the app normally. To enable mic recording, install sounddevice + soundfile and the required system audio libraries.",
+            )
+            return
+
         # Respect the setting (can be toggled in Settings → Voice).
         if (self.db.get_setting("voice_input_enabled", "0") or "0") != "1":
             QtWidgets.QMessageBox.information(

@@ -17,18 +17,13 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.11"
           cache: "pip"
-
-      - name: Install system deps (audio libs)
-        shell: bash
-        run: |
-          set -euo pipefail
-          brew update
-          brew install portaudio libsndfile
 
       - name: Build Miriam.app (lite)
         shell: bash
+        env:
+          MACOSX_DEPLOYMENT_TARGET: "11.0"
         run: |
           set -euo pipefail
           bash ./build_macos_lite.sh
@@ -47,4 +42,3 @@ jobs:
           name: Miriam-macOS-lite
           path: artifacts/Miriam-macOS.app.zip
           if-no-files-found: error
-

@@ -31,7 +31,7 @@ The app stores its SQLite DB here:
 
 ### macOS
 
-1) Install Python 3.11 or 3.12 (recommended for binary wheels)
+1) Install Python 3.11 (recommended for macOS 11 Big Sur compatibility)
 2) In a terminal:
 
 ```bash
@@ -91,7 +91,8 @@ Output:
 On macOS, build with PyInstaller to produce `dist/Miriam.app`.
 
 ### Lite build (recommended)
-This excludes FAISS / sentence-transformers (the app still works; RAG retrieval modes `lexical`/`bm25` are available).
+This excludes FAISS / sentence-transformers and voice dependencies (the app still works; RAG retrieval modes `lexical`/`bm25` are available).
+This is intended to build cleanly on macOS Big Sur without Homebrew.
 
 ```bash
 ./build_macos_lite.sh

@@ -7,8 +7,4 @@ rank-bm25>=0.2.2
 pydicom>=2.4.4
 Pillow>=10.2.0
 nibabel>=5.2.1
-sounddevice>=0.4.6
-soundfile>=0.12.1
-pyttsx3>=2.90
 pyinstaller>=6.2.0
-
